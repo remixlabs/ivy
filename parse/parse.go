@@ -164,7 +164,7 @@ func (e variableExpr) ProgString() string {
 // may require parentheses around it when printed to maintain correct evaluation order.
 func isCompound(x interface{}) bool {
 	switch x.(type) {
-	case value.Char, value.Int, value.BigInt, value.BigRat, value.BigFloat, value.Vector, value.Matrix:
+	case value.Char, value.Int, value.BigInt, value.BigRat, value.BigFloat, value.Vector, value.Matrix, value.String:
 		return false
 	case sliceExpr, variableExpr:
 		return false
@@ -551,7 +551,7 @@ func (p *Parser) numberOrVector(tok scan.Token) value.Expr {
 	var slice sliceExpr
 	if expr == nil {
 		// Must be a string.
-		slice = append(slice, evalString(str)...)
+		slice = append(slice, value.String(str))
 	} else {
 		slice = sliceExpr{expr}
 	}
@@ -571,7 +571,7 @@ func (p *Parser) numberOrVector(tok scan.Token) value.Expr {
 				expr, str = p.number(p.next())
 				if expr == nil {
 					// Must be a string.
-					slice = append(slice, evalString(str)...)
+					slice = append(slice, value.String(str))
 					continue
 				}
 			default:
@@ -588,7 +588,7 @@ func (p *Parser) numberOrVector(tok scan.Token) value.Expr {
 
 func isScalar(v value.Value) bool {
 	switch v := v.(type) {
-	case value.Int, value.Char, value.BigInt, value.BigRat, value.BigFloat:
+	case value.Int, value.Char, value.BigInt, value.BigRat, value.BigFloat, value.String:
 		return true
 	case Assignment:
 		return isScalar(v.Value)

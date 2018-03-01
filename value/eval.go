@@ -14,12 +14,13 @@ const (
 	bigIntType
 	bigRatType
 	bigFloatType
+	stringType
 	vectorType
 	matrixType
 	numType
 )
 
-var typeName = [...]string{"int", "char", "big int", "rational", "float", "vector", "matrix"}
+var typeName = [...]string{"int", "char", "big int", "rational", "float", "string", "vector", "matrix"}
 
 func (t valueType) String() string {
 	return typeName[t]
@@ -75,6 +76,8 @@ func whichType(v Value) valueType {
 		return vectorType
 	case Matrix:
 		return matrixType
+	case String:
+		return stringType
 	}
 	Errorf("unknown type %T in whichType", v)
 	panic("which type")

@@ -77,6 +77,8 @@ func (v Vector) toType(conf *config.Config, which valueType) Value {
 		return v
 	case matrixType:
 		return NewMatrix([]Value{Int(len(v))}, v)
+	case stringType:
+		return NewString(v.Sprint(conf))
 	}
 	Errorf("cannot convert vector to %s", which)
 	return nil

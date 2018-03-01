@@ -133,6 +133,8 @@ func (f BigFloat) Inner() Value {
 
 func (f BigFloat) toType(conf *config.Config, which valueType) Value {
 	switch which {
+	case stringType:
+		return NewString(f.Sprint(conf))
 	case bigFloatType:
 		return f
 	case vectorType:

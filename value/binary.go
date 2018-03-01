@@ -179,6 +179,9 @@ func init() {
 				bigFloatType: func(c Context, u, v Value) Value {
 					return binaryBigFloatOp(c, u, (*big.Float).Add, v)
 				},
+				stringType: func(c Context, u, v Value) Value {
+					return String(string(u.(String)) + string(v.(String)))
+				},
 			},
 		},
 
@@ -483,6 +486,9 @@ func init() {
 					i, j := u.(BigFloat), v.(BigFloat)
 					return toInt(i.Cmp(j.Float) == 0)
 				},
+				stringType: func(c Context, u, v Value) Value {
+					return toInt(string(u.(String)) == string(v.(String)))
+				},
 			},
 		},
 
@@ -508,6 +514,9 @@ func init() {
 				bigFloatType: func(c Context, u, v Value) Value {
 					i, j := u.(BigFloat), v.(BigFloat)
 					return toInt(i.Cmp(j.Float) != 0)
+				},
+				stringType: func(c Context, u, v Value) Value {
+					return toInt(string(u.(String)) != string(v.(String)))
 				},
 			},
 		},
@@ -535,6 +544,9 @@ func init() {
 					i, j := u.(BigFloat), v.(BigFloat)
 					return toInt(i.Cmp(j.Float) < 0)
 				},
+				stringType: func(c Context, u, v Value) Value {
+					return toInt(string(u.(String)) < string(v.(String)))
+				},
 			},
 		},
 
@@ -560,6 +572,9 @@ func init() {
 				bigFloatType: func(c Context, u, v Value) Value {
 					i, j := u.(BigFloat), v.(BigFloat)
 					return toInt(i.Cmp(j.Float) <= 0)
+				},
+				stringType: func(c Context, u, v Value) Value {
+					return toInt(string(u.(String)) <= string(v.(String)))
 				},
 			},
 		},
@@ -587,6 +602,9 @@ func init() {
 					i, j := u.(BigFloat), v.(BigFloat)
 					return toInt(i.Cmp(j.Float) > 0)
 				},
+				stringType: func(c Context, u, v Value) Value {
+					return toInt(string(u.(String)) > string(v.(String)))
+				},
 			},
 		},
 
@@ -612,6 +630,9 @@ func init() {
 				bigFloatType: func(c Context, u, v Value) Value {
 					i, j := u.(BigFloat), v.(BigFloat)
 					return toInt(i.Cmp(j.Float) >= 0)
+				},
+				stringType: func(c Context, u, v Value) Value {
+					return toInt(string(u.(String)) >= string(v.(String)))
 				},
 			},
 		},

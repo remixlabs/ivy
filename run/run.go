@@ -36,7 +36,7 @@ func IvyEval(context value.Context, str string) value.Value {
 // value is true, it means we ran out of data (EOF) and the run was successful.
 // Typical execution is therefore to loop calling Run until it succeeds.
 // Error details are reported to the configured error output stream.
-func Run(p *parse.Parser, context value.Context, interactive bool) (success bool) {
+func Run(p *parse.Parser, context value.Context, interactive bool) (success bool, last value.Value) {
 	conf := context.Config()
 	writer := conf.Output()
 	defer func() {
@@ -73,10 +73,11 @@ func Run(p *parse.Parser, context value.Context, interactive bool) (success bool
 			}
 		}
 		if printValues(conf, writer, values) {
-			context.Assign("_", values[len(values)-1])
+			last = values[len(values)-1]
+			context.Assign("_", last)
 		}
 		if !ok {
-			return true
+			return true, last
 		}
 		if interactive {
 			if exprs != nil && conf.Debug("cpu") && conf.CPUTime() != 0 {

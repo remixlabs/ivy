@@ -155,6 +155,9 @@ func init() {
 				bigFloatType: func(c Context, v Value) Value {
 					return unaryBigFloatOp(c, bigFloatWrap((*big.Float).Neg), v)
 				},
+				stringType: func(c Context, v Value) Value {
+					return v.(String).toType(nil, vectorType)
+				},
 			},
 		},
 

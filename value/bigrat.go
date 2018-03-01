@@ -182,6 +182,8 @@ func (r BigRat) toType(conf *config.Config, which valueType) Value {
 		return NewVector([]Value{r})
 	case matrixType:
 		return NewMatrix([]Value{one, one}, []Value{r})
+	case stringType:
+		return NewString(r.Sprint(conf))
 	}
 	Errorf("cannot convert rational to %s", which)
 	return nil

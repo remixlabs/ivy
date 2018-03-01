@@ -49,6 +49,8 @@ func (c Char) toType(conf *config.Config, which valueType) Value {
 		return NewVector([]Value{c})
 	case matrixType:
 		return NewMatrix([]Value{one}, []Value{c})
+	case stringType:
+		return NewString(c.Sprint(conf))
 	}
 	Errorf("cannot convert %s to char", which)
 	return nil

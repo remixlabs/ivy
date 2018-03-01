@@ -89,7 +89,7 @@ func main() {
 			}
 			scanner := scan.New(context, name, bufio.NewReader(fd))
 			parser := parse.NewParser(name, scanner, context)
-			if !run.Run(parser, context, interactive) {
+			if ok, _ := run.Run(parser, context, interactive); !ok {
 				break
 			}
 		}
@@ -98,7 +98,7 @@ func main() {
 
 	scanner := scan.New(context, "<stdin>", bufio.NewReader(os.Stdin))
 	parser := parse.NewParser("<stdin>", scanner, context)
-	for !run.Run(parser, context, true) {
+	for ok := false; !ok; ok, _ = run.Run(parser, context, true) {
 	}
 }
 

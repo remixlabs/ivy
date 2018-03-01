@@ -148,6 +148,8 @@ func (i Int) toType(conf *config.Config, which valueType) Value {
 		return NewVector([]Value{i})
 	case matrixType:
 		return NewMatrix([]Value{one}, []Value{i})
+	case stringType:
+		return NewString(i.Sprint(conf))
 	}
 	Errorf("cannot convert int to %s", which)
 	return nil
