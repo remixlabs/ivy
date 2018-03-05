@@ -61,6 +61,28 @@ func tree(e interface{}) string {
 	}
 }
 
+type mapExpr []value.Expr
+
+func (m mapExpr) Eval(context value.Context) value.Value {
+	v := map[string]value.Value{}
+	for _, x := range m {
+		if ve, ok := x.(variableExpr); ok {
+			v[ve.name] = x.Eval(context)
+		}
+	}
+	return value.Map(v)
+}
+
+func (m mapExpr) ProgString() string {
+	s := "{ "
+	for _, x := range m {
+		if ve, ok := x.(variableExpr); ok {
+			s += ve.name + " "
+		}
+	}
+	return s + "}"
+}
+
 // sliceExpr holds a syntactic vector to be verified and evaluated.
 type sliceExpr []value.Expr
 
@@ -377,7 +399,7 @@ func (p *Parser) expressionList() ([]value.Expr, bool) {
 	switch tok.Type {
 	case scan.EOF: // Expect to be at end of line.
 	default:
-		p.errorf("unexpected %s", tok)
+		p.errorf("exprList: unexpected %s", tok)
 	}
 	if len(exprs) > 0 && p.context.Config().Debug("parse") {
 		p.Println(tree(exprs))
@@ -415,7 +437,7 @@ func (p *Parser) expr() value.Expr {
 	expr := p.operand(tok, true)
 	tok = p.peek()
 	switch tok.Type {
-	case scan.EOF, scan.RightParen, scan.RightBrack, scan.Semicolon:
+	case scan.EOF, scan.RightParen, scan.RightBrack, scan.Semicolon, scan.RightBrace:
 		return expr
 	case scan.Identifier:
 		if p.context.DefinedBinary(tok.Text) {
@@ -456,6 +478,7 @@ func (p *Parser) expr() value.Expr {
 //	vector
 //	operand [ Expr ]...
 //	unop Expr
+//  '{' mapkeys '}'
 func (p *Parser) operand(tok scan.Token, indexOK bool) value.Expr {
 	var expr value.Expr
 	switch tok.Type {
@@ -475,8 +498,20 @@ func (p *Parser) operand(tok scan.Token, indexOK bool) value.Expr {
 		fallthrough
 	case scan.Number, scan.Rational, scan.String, scan.LeftParen:
 		expr = p.numberOrVector(tok)
+	case scan.LeftBrace:
+		// p.next()
+		expr = p.expr()
+		if sl, ok := expr.(sliceExpr); ok {
+			expr = mapExpr(sl)
+		} else {
+			expr = mapExpr([]value.Expr{expr})
+		}
+		tok := p.next()
+		if tok.Type != scan.RightBrace {
+			p.errorf("expected right brace, found %s", tok)
+		}
 	default:
-		p.errorf("unexpected %s", tok)
+		p.errorf("operand: unexpected %s", tok)
 	}
 	if indexOK {
 		expr = p.index(expr)

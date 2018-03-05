@@ -17,6 +17,7 @@ const (
 	stringType
 	vectorType
 	matrixType
+	mapType
 	numType
 )
 

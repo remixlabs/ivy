@@ -36,12 +36,14 @@ const (
 	Char           // printable ASCII character; grab bag for comma etc.
 	GreaterOrEqual // '>='
 	Identifier     // alphanumeric identifier
+	LeftBrace      // '{'
 	LeftBrack      // '['
 	LeftParen      // '('
 	Number         // simple number
 	Operator       // known operator
 	Op             // "op", operator definition keyword
 	Rational       // rational number like 2/3
+	RightBrace     // '}'
 	RightBrack     // ']'
 	RightParen     // ')'
 	Semicolon      // ';'
@@ -279,8 +281,14 @@ func lexAny(l *Scanner) stateFn {
 	case isAlphaNumeric(r):
 		l.backup()
 		return lexIdentifier
+	case r == '{':
+		l.emit(LeftBrace)
+		return lexAny
 	case r == '[':
 		l.emit(LeftBrack)
+		return lexAny
+	case r == '}':
+		l.emit(RightBrace)
 		return lexAny
 	case r == ']':
 		l.emit(RightBrack)
