@@ -43,7 +43,7 @@ func (s String) toType(conf *config.Config, which valueType) Value {
 	case stringType:
 		return s
 	case vectorType:
-		return NewVector(s.toArray())
+		return NewVector([]Value{s})
 	case matrixType:
 		return NewMatrix([]Value{one}, s.toArray())
 	}
