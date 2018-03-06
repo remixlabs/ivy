@@ -233,8 +233,48 @@ func (b *binary) Eval(context value.Context) value.Value {
 	if b.op == "=" {
 		// Special handling as we cannot evaluate the left.
 		// We know the left is a variableExpr.
-		lhs := b.left.(variableExpr)
-		context.Assign(lhs.name, rhs)
+		if lhs, ok := b.left.(variableExpr); ok {
+			context.Assign(lhs.name, rhs)
+		} else if bl, ok := b.left.(*binary); ok && bl.op == "[]" {
+			// Special handling to lookup a vector
+			// and inject a value
+			if blhs, ok := bl.left.(variableExpr); ok {
+				vec := context.Lookup(blhs.name)
+				if vec == nil {
+					value.Errorf("%s not found", blhs.name)
+				}
+				A := vec.(value.Vector)
+				origin := value.Int(context.Config().Origin())
+				if single, ok := bl.right.(value.Int); ok {
+					A[single-origin] = rhs
+				} else {
+					Ai := bl.right.(sliceExpr).Eval(context).(value.Vector)
+					B := rhs.(value.Vector)
+					if len(Ai) != len(B) {
+						value.Errorf("cannot assign slices of differing lengths")
+					}
+					// first pass checks indexes
+					for _, a := range Ai {
+						if ai, ok := a.(value.Int); !ok {
+							value.Errorf("index must be integer")
+						} else {
+							ai -= origin
+							if ai < 0 || value.Int(len(A)) <= ai {
+								value.Errorf("index %d out of range", ai+origin)
+							}
+						}
+					}
+					// second pass sets them
+					for i, a := range Ai {
+						A[a.(value.Int)-origin] = B[i]
+					}
+				}
+			} else {
+				value.Errorf("cannot assign %s", tree(blhs))
+			}
+		} else {
+			value.Errorf("%s is not a known lhs for assignment", bl.op)
+		}
 		return Assignment{Value: rhs}
 	}
 	lhs := b.left.Eval(context)
@@ -450,12 +490,12 @@ func (p *Parser) expr() value.Expr {
 		}
 	case scan.Assign:
 		p.next()
-		variable, ok := expr.(variableExpr)
-		if !ok {
-			p.errorf("cannot assign to %s", tree(expr))
-		}
+		// variable, ok := expr.(variableExpr)
+		// if !ok {
+		// 	p.errorf("cannot assign to %s", tree(expr))
+		// }
 		return &binary{
-			left:  variable,
+			left:  expr,
 			op:    tok.Text,
 			right: p.expr(),
 		}
