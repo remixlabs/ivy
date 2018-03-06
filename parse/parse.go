@@ -249,7 +249,10 @@ func (b *binary) Eval(context value.Context) value.Value {
 					A[single-origin] = rhs
 				} else {
 					Ai := bl.right.(sliceExpr).Eval(context).(value.Vector)
-					B := rhs.(value.Vector)
+					B, ok := rhs.(value.Vector)
+					if !ok {
+						value.Errorf("rhs must be a matching vector")
+					}
 					if len(Ai) != len(B) {
 						value.Errorf("cannot assign slices of differing lengths")
 					}
